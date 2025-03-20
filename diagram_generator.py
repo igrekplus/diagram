@@ -5,6 +5,10 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import black, red, blue, green  # 例として色を追加
 import json
 import os
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+import matplotlib.font_manager as fm  # フォント検索用
 
 def load_timetable_data(folder_path="time_tables", use_mock_data=False):
     """
@@ -80,6 +84,15 @@ def create_diagram(timetable_data, stations, file_path="diagram.pdf"):
     c = canvas.Canvas(file_path, pagesize=A4)
     width, height = A4
 
+    # フォントの登録
+    try:
+        # UnicodeCIDFontを使用して簡単に日本語フォントを設定
+        pdfmetrics.registerFont(UnicodeCIDFont("HeiseiKakuGo-W5"))
+        c.setFont("HeiseiKakuGo-W5", 10)  # フォント設定
+    except Exception as e:
+        print(f"フォントの登録に失敗しました: {e}")
+        return
+
     # ダイヤグラムの描画範囲を定義
     diagram_top = 50 * mm
     diagram_bottom = (height - 50) * mm
@@ -89,8 +102,6 @@ def create_diagram(timetable_data, stations, file_path="diagram.pdf"):
     # 縦軸（駅）の描画
     num_stations = len(stations)
     station_interval = (diagram_bottom - diagram_top) / (num_stations - 1)  # 駅間隔を計算
-
-    c.setFont("HeiseiKakuGo-W5", 10)  # フォント設定
 
     for i, station in enumerate(stations):
         y = diagram_bottom - i * station_interval
