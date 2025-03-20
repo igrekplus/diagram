@@ -5,7 +5,7 @@ import json
 from timetable_mock import get_mock_timetable_data  # 追加
 import os  # 追加
 
-def get_timetable_data(url):
+def get_timetable_data(url, station_name):
     """
     NAVITIMEの時刻表ページからHTMLを取得し、必要なデータを抽出する。
 
@@ -58,14 +58,17 @@ def get_timetable_data(url):
     except requests.exceptions.RequestException as e:
         logging.error(f"Request failed: {e}")
     finally:
-        # JSON形式に変換
-        json_data = json.dumps(timetable_data, ensure_ascii=False, indent=2)
+        # 駅名をキーにしたデータ構造に変換
+        station_timetable = {station_name: timetable_data}
         
-        # URLからstCdの値を取得してファイル名に使用
-        stCd = url.split("stCd=")[1].split("&")[0]
+        # JSON形式に変換
+        json_data = json.dumps(station_timetable, ensure_ascii=False, indent=2)
+        
+        # 駅名をファイル名に使用
+        sanitized_station_name = station_name.replace(" ", "_").replace("/", "_")  # ファイル名に使用できない文字を置換
         output_dir = "diagram/time_tables"
         os.makedirs(output_dir, exist_ok=True)  # ディレクトリが存在しない場合は作成
-        file_path = os.path.join(output_dir, f"{stCd}_timetable.json")
+        file_path = os.path.join(output_dir, f"{sanitized_station_name}_timetable.json")
         
         # JSONデータをファイルに保存
         with open(file_path, "w", encoding="utf-8") as f:
@@ -76,13 +79,13 @@ def get_timetable_data(url):
 
 if __name__ == "__main__":
     # テスト用のURL
-    test_url = "https://transfer.navitime.biz/tokyu/pc/diagram/TrainDiagram?stCd=00006133&rrCd=00000790&updown=1"
+    test_url = "https://transfer.navitime.biz/tokyu/pc/diagram/TrainDiagram?stCd=00003544&rrCd=00000790&updown=1"
 
     # 時刻表データを取得
-    timetable = get_timetable_data(test_url)
+    timetable = get_timetable_data(test_url,"渋谷")
 
     if timetable:
         # 取得したデータを表示
-        print(f"取得した時刻表データ: {timetable}")  # 取得成功時のデータ出力
+        print(f"出力に成功しました")  # 取得成功時のデータ出力
     else:
         print("時刻表データの取得に失敗しました。")  # 取得失敗時のメッセージ
