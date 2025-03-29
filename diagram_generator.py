@@ -78,7 +78,7 @@ def load_timetable_data(folder_path="diagram/time_tables", use_mock_data=False):
     return timetable_data
 
 
-def create_diagram(timetable_data, stations, file_path="diagram.pdf"):
+def create_diagram(timetable_data, stations, file_path="diagram/diagram.pdf"):
     """
     時刻表データからダイヤグラムを生成し、PDFファイルとして出力する関数。
 
@@ -147,7 +147,7 @@ def create_diagram(timetable_data, stations, file_path="diagram.pdf"):
             種別 = train["種別"]
             行き先 = train["行き先"]
 
-            hour, minute = map(int, 時刻.replace('時台','').replace('分','').split('時'))
+            hour, minute = divmod(int(時刻.replace('時台','').replace('分','')), 100)
             train_minutes = (hour - start_hour) * 60 + minute
             x = diagram_left + train_minutes * time_interval
             y = diagram_bottom - station_idx * station_interval
