@@ -54,7 +54,11 @@ def get_timetable_data(url, station_name):
                         行き先 = "元町・中華街"
                     時刻分 = train.find("div", class_="minute").text.strip()
 
-                    timetable_data.append({"時刻": f"{時刻}{時刻分}分", "種別": 種別, "行き先": 行き先})
+                    # 時刻を二桁の数値項目に変換（例: 5時台00分 → 0500）
+                    時間 = 時刻.replace('時台', '')
+                    分 = 時刻分.replace('分', '')
+                    時刻数値 = f"{int(時間):02d}{int(分):02d}"  # 二桁の数値形式に変換
+                    timetable_data.append({"時刻": 時刻数値, "種別": 種別, "行き先": 行き先})
     except requests.exceptions.RequestException as e:
         logging.error(f"Request failed: {e}")
     finally:

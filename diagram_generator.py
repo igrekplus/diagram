@@ -10,7 +10,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 import matplotlib.font_manager as fm  # フォント検索用
 
-def load_timetable_data(folder_path="time_tables", use_mock_data=False):
+def load_timetable_data(folder_path="diagram/time_tables", use_mock_data=False):
     """
     指定したフォルダ内のJSONファイルから時刻表データを読み込む関数。
 
@@ -42,6 +42,9 @@ def load_timetable_data(folder_path="time_tables", use_mock_data=False):
 
     timetable_data = {}
 
+    # folder_pathを絶対パスに変換
+    folder_path = os.path.abspath(folder_path)
+
     if use_mock_data:
         # モックデータを生成する処理
         # ここでは、モックデータを返す関数などを呼び出す
@@ -57,9 +60,14 @@ def load_timetable_data(folder_path="time_tables", use_mock_data=False):
                     file_path = os.path.join(folder_path, filename)
                     with open(file_path, "r", encoding="utf-8") as f:
                         data = json.load(f)
-                        # ファイル名から駅名を取得 (例: "shibuya_timetable.json" -> "渋谷")
-                        station_name = filename.split("_")[0].capitalize()
-                        timetable_data[station_name] = data
+                        # ファイル名から駅名を取得 (例: "中目黒_timetable.json" -> "中目黒")
+                        station_name = filename.split("_")[0]
+                        
+                        # JSONデータから駅名をキーにしたリストを取得
+                        if station_name in data:
+                            timetable_data[station_name] = data[station_name]
+                        else:
+                            print(f"Warning: Station name '{station_name}' not found in {filename}")
         except FileNotFoundError:
             print(f"Error: Folder '{folder_path}' not found.")
         except json.JSONDecodeError:
